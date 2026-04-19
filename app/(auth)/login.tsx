@@ -1,13 +1,15 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useMutation } from '@tanstack/react-query';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { login } from '@/api/auth';
+import { getErrorMessage } from '@/lib/api-error';
 import { useAuthStore } from '@/store/auth-store';
+import { showErrorToast, showSuccessToast } from '@/store/toast-store';
 import { useState } from 'react';
 
 export default function LoginScreen() {
@@ -22,10 +24,17 @@ export default function LoginScreen() {
     mutationFn: login,
     onSuccess: async (session) => {
       await setSession(session);
+      showSuccessToast({
+        title: 'Welcome back',
+        message: 'You are signed in.',
+      });
       router.replace('/(tabs)');
     },
-    onError: () => {
-      Alert.alert('Login failed', 'Check your details and try again.');
+    onError: (error) => {
+      showErrorToast({
+        title: 'Login failed',
+        message: getErrorMessage(error, 'Check your details and try again.'),
+      });
     },
   });
 

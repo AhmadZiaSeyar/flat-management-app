@@ -8,8 +8,10 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { SectionTitle } from '@/components/ui/section-title';
 import { SummaryCard } from '@/components/ui/summary-card';
+import { getErrorMessage } from '@/lib/api-error';
 import { formatAmount, formatDateLabel, formatMonthLabel } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
+import { showErrorToast, showSuccessToast } from '@/store/toast-store';
 
 export default function ReportsScreen() {
   const queryClient = useQueryClient();
@@ -34,11 +36,21 @@ export default function ReportsScreen() {
 
   const budgetMutation = useMutation({
     mutationFn: upsertCurrentBudget,
-    onSuccess: async () => {
+    onSuccess: async (budget) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['budget'] }),
         queryClient.invalidateQueries({ queryKey: ['reports'] }),
       ]);
+      showSuccessToast({
+        title: 'Budget updated',
+        message: `${formatAmount(budget.amount)} is now set for this month.`,
+      });
+    },
+    onError: (error) => {
+      showErrorToast({
+        title: 'Budget not updated',
+        message: getErrorMessage(error, 'Try again in a moment.'),
+      });
     },
   });
 

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 import { useAuthStore } from '@/store/auth-store';
+import { showErrorToast } from '@/store/toast-store';
 import { AuthResponse } from '@/types/api';
 
 const fallbackBaseUrl = Platform.select({
@@ -59,6 +60,10 @@ async function refreshAccessToken() {
 
   if (!refreshToken) {
     await signOut();
+    showErrorToast({
+      title: 'Signed out',
+      message: 'Your session ended. Please sign in again.',
+    });
     return null;
   }
 
@@ -72,6 +77,10 @@ async function refreshAccessToken() {
     return data.accessToken;
   } catch {
     await signOut();
+    showErrorToast({
+      title: 'Signed out',
+      message: 'Your session ended. Please sign in again.',
+    });
     return null;
   }
 }

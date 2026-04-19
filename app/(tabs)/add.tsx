@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { AppButton } from '@/components/ui/app-button';
 import { CategoryCard } from '@/components/ui/category-card';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { SectionTitle } from '@/components/ui/section-title';
 import { getCategories } from '@/api/categories';
 import { createExpense } from '@/api/expenses';
+import { getErrorMessage } from '@/lib/api-error';
+import { showErrorToast, showInfoToast, showSuccessToast } from '@/store/toast-store';
 import { useState } from 'react';
 
 const quickAmounts = ['50', '100', '250', '500'];
@@ -32,10 +34,16 @@ export default function AddExpenseScreen() {
       setAmount('');
       setSelectedCategoryId(null);
       setNote('');
-      Alert.alert('Saved', 'Expense added.');
+      showSuccessToast({
+        title: 'Expense saved',
+        message: 'The shared list is updated.',
+      });
     },
-    onError: () => {
-      Alert.alert('Could not save', 'Check the amount and category.');
+    onError: (error) => {
+      showErrorToast({
+        title: 'Could not save',
+        message: getErrorMessage(error, 'Check the amount and category.'),
+      });
     },
   });
 
@@ -43,7 +51,10 @@ export default function AddExpenseScreen() {
     const parsedAmount = Number(amount);
 
     if (!parsedAmount || !selectedCategoryId) {
-      Alert.alert('Missing info', 'Add an amount and choose a category.');
+      showInfoToast({
+        title: 'Need more info',
+        message: 'Add an amount and choose a category.',
+      });
       return;
     }
 

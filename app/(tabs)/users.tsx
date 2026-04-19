@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { createUser, getRoles, getUsers, updateUserRoles, updateUserStatus } from '@/api/users';
 import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { SectionTitle } from '@/components/ui/section-title';
+import { getErrorMessage } from '@/lib/api-error';
 import { formatLongDateLabel } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
+import { showErrorToast, showSuccessToast } from '@/store/toast-store';
 import { RoleName } from '@/types/api';
 import { useState } from 'react';
 
@@ -37,7 +39,7 @@ export default function UsersScreen() {
 
   const createUserMutation = useMutation({
     mutationFn: createUser,
-    onSuccess: async () => {
+    onSuccess: async (createdUser) => {
       await queryClient.invalidateQueries({ queryKey: ['users'] });
       setFullName('');
       setUsername('');
@@ -45,26 +47,54 @@ export default function UsersScreen() {
       setPassword('');
       setPin('');
       setRoleNames(['Member']);
-      Alert.alert('User added', 'The new roommate is ready.');
+      showSuccessToast({
+        title: 'User added',
+        message: `${createdUser.fullName} is ready to join the flat.`,
+      });
     },
-    onError: () => {
-      Alert.alert('Could not add user', 'Check the info and try again.');
+    onError: (error) => {
+      showErrorToast({
+        title: 'Could not add user',
+        message: getErrorMessage(error, 'Check the info and try again.'),
+      });
     },
   });
 
   const updateRolesMutation = useMutation({
     mutationFn: ({ userId, nextRoles }: { userId: string; nextRoles: RoleName[] }) =>
       updateUserRoles(userId, nextRoles),
-    onSuccess: async () => {
+    onSuccess: async (updatedUser) => {
       await queryClient.invalidateQueries({ queryKey: ['users'] });
+      showSuccessToast({
+        title: 'Roles updated',
+        message: `${updatedUser.fullName} now has ${updatedUser.roles.join(', ')} access.`,
+      });
+    },
+    onError: (error) => {
+      showErrorToast({
+        title: 'Roles not updated',
+        message: getErrorMessage(error, 'Try again in a moment.'),
+      });
     },
   });
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
       updateUserStatus(userId, isActive),
-    onSuccess: async () => {
+    onSuccess: async (updatedUser) => {
       await queryClient.invalidateQueries({ queryKey: ['users'] });
+      showSuccessToast({
+        title: updatedUser.isActive ? 'User enabled' : 'User disabled',
+        message: updatedUser.isActive
+          ? `${updatedUser.fullName} can use the app again.`
+          : `${updatedUser.fullName} is paused for now.`,
+      });
+    },
+    onError: (error) => {
+      showErrorToast({
+        title: 'Status not updated',
+        message: getErrorMessage(error, 'Try again in a moment.'),
+      });
     },
   });
 

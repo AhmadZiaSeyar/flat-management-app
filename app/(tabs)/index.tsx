@@ -13,6 +13,7 @@ import { SectionTitle } from '@/components/ui/section-title';
 import { SummaryCard } from '@/components/ui/summary-card';
 import { formatAmount, formatLongDateLabel, getFirstName } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
+import { showInfoToast } from '@/store/toast-store';
 import { Expense } from '@/types/api';
 import { useState } from 'react';
 
@@ -21,6 +22,7 @@ const filters: ('today' | 'week' | 'month')[] = ['today', 'week', 'month'];
 export default function HomeScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const signOut = useAuthStore((state) => state.signOut);
   const [range, setRange] = useState<'today' | 'week' | 'month'>('today');
 
   const weeklyReportQuery = useQuery({
@@ -42,6 +44,14 @@ export default function HomeScreen() {
 
   const groupedExpenses = groupExpenses(expensesQuery.data ?? []);
 
+  const handleSignOut = async () => {
+    await signOut();
+    showInfoToast({
+      title: 'Signed out',
+      message: 'See you again soon.',
+    });
+  };
+
   return (
     <ScreenShell>
       <LinearGradient
@@ -49,9 +59,22 @@ export default function HomeScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         className="rounded-[34px] p-6">
-        <Text className="text-base font-semibold text-white/80">
-          Hi {getFirstName(user?.fullName ?? 'friend')}
-        </Text>
+        <View className="flex-row items-start justify-between">
+          <View>
+            <Text className="text-base font-semibold text-white/80">
+              Hi {getFirstName(user?.fullName ?? 'friend')}
+            </Text>
+          </View>
+
+          <Pressable
+            accessibilityLabel="Log out"
+            className="h-12 w-12 items-center justify-center rounded-[18px] bg-white/12"
+            onPress={() => {
+              void handleSignOut();
+            }}>
+            <Ionicons color="#FFFFFF" name="log-out-outline" size={22} />
+          </Pressable>
+        </View>
         <Text className="mt-2 text-4xl font-black text-white">
           {formatAmount(monthlyReportQuery.data?.total ?? 0)}
         </Text>
