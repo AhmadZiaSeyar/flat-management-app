@@ -1,53 +1,89 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+export const palette = {
+  background: '#F6EFE4',
+  surface: '#FFF9F0',
+  panel: '#FFFFFF',
+  border: '#E7DCCB',
+  ink: '#1F1B16',
+  muted: '#716759',
+  green: '#16855D',
+  greenSoft: '#D9F3E8',
+  red: '#D74C3C',
+  redSoft: '#FCE2DD',
+  yellow: '#D9A21B',
+  yellowSoft: '#F9EDCA',
+  blue: '#2C69D1',
+  blueSoft: '#DAE7FF',
+  slate: '#514A42',
+  shadow: 'rgba(40, 29, 18, 0.08)',
+};
 
-import { Platform } from 'react-native';
-
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export const layout = {
+  screenPadding: 20,
+  radius: 22,
+  pillRadius: 999,
+};
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: palette.ink,
+    background: palette.background,
+    tint: palette.green,
+    icon: palette.muted,
+    tabIconDefault: palette.muted,
+    tabIconSelected: palette.green,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: palette.ink,
+    background: palette.background,
+    tint: palette.green,
+    icon: palette.muted,
+    tabIconDefault: palette.muted,
+    tabIconSelected: palette.green,
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+export const Fonts = {
+  sans: 'System',
+  serif: 'System',
+  rounded: 'System',
+  mono: 'Courier',
+};
+
+export const categoryIconMap: Record<string, string> = {
+  restaurant: 'restaurant',
+  home: 'home',
+  flash: 'flash',
+  car: 'car-sport',
+  sparkles: 'sparkles',
+  wifi: 'wifi',
+};
+
+export const navTheme = {
+  dark: false,
+  colors: {
+    primary: palette.green,
+    background: palette.background,
+    card: palette.panel,
+    text: palette.ink,
+    border: palette.border,
+    notification: palette.red,
   },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+  fonts: {
+    regular: {
+      fontFamily: 'System',
+      fontWeight: '400' as const,
+    },
+    medium: {
+      fontFamily: 'System',
+      fontWeight: '500' as const,
+    },
+    bold: {
+      fontFamily: 'System',
+      fontWeight: '700' as const,
+    },
+    heavy: {
+      fontFamily: 'System',
+      fontWeight: '800' as const,
+    },
   },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded: "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+};

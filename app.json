@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "flat-management-app",
-    "slug": "flat-management-app",
+    "name": "Flat Expense Manager",
+    "slug": "flat-expense-manager",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "flatmanagementapp",
-    "userInterfaceStyle": "automatic",
+    "scheme": "flatexpensemanager",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
@@ -33,9 +33,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F6EFE4",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#F6EFE4"
           }
         }
       ]

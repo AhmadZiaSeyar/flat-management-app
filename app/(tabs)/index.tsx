@@ -1,98 +1,146 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { Pressable, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { getCurrentBudget } from '@/api/budgets';
+import { getExpenses } from '@/api/expenses';
+import { getMonthlyReport, getWeeklyReport } from '@/api/reports';
+import { ExpenseItem } from '@/components/ui/expense-item';
+import { ProgressBar } from '@/components/ui/progress-bar';
+import { ScreenShell } from '@/components/ui/screen-shell';
+import { SectionTitle } from '@/components/ui/section-title';
+import { SummaryCard } from '@/components/ui/summary-card';
+import { formatAmount, formatLongDateLabel, getFirstName } from '@/lib/format';
+import { useAuthStore } from '@/store/auth-store';
+import { Expense } from '@/types/api';
+import { useState } from 'react';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+const filters: ('today' | 'week' | 'month')[] = ['today', 'week', 'month'];
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const [range, setRange] = useState<'today' | 'week' | 'month'>('today');
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  const weeklyReportQuery = useQuery({
+    queryKey: ['reports', 'weekly'],
+    queryFn: getWeeklyReport,
+  });
+  const monthlyReportQuery = useQuery({
+    queryKey: ['reports', 'monthly'],
+    queryFn: getMonthlyReport,
+  });
+  const budgetQuery = useQuery({
+    queryKey: ['budget', 'current'],
+    queryFn: getCurrentBudget,
+  });
+  const expensesQuery = useQuery({
+    queryKey: ['expenses', range],
+    queryFn: () => getExpenses(range),
+  });
+
+  const groupedExpenses = groupExpenses(expensesQuery.data ?? []);
+
+  return (
+    <ScreenShell>
+      <LinearGradient
+        colors={['#16855D', '#0E5A45']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="rounded-[34px] p-6">
+        <Text className="text-base font-semibold text-white/80">
+          Hi {getFirstName(user?.fullName ?? 'friend')}
+        </Text>
+        <Text className="mt-2 text-4xl font-black text-white">
+          {formatAmount(monthlyReportQuery.data?.total ?? 0)}
+        </Text>
+        <Text className="mt-2 text-sm font-semibold text-white/75">This month spend</Text>
+
+        <View className="mt-6 rounded-[24px] bg-white/12 p-4">
+          <View className="mb-3 flex-row items-center justify-between">
+            <Text className="text-base font-black text-white">Budget</Text>
+            <Text className="text-sm font-bold text-white/80">
+              {formatAmount(budgetQuery.data?.spent ?? 0)} / {formatAmount(budgetQuery.data?.amount ?? 0)}
+            </Text>
+          </View>
+          <ProgressBar
+            colorClassName="bg-white"
+            total={budgetQuery.data?.amount ?? 0}
+            value={budgetQuery.data?.spent ?? 0}
+          />
+        </View>
+
+        <Pressable
+          className="mt-5 flex-row items-center justify-center rounded-[22px] bg-white px-5 py-4"
+          onPress={() => router.push('/(tabs)/add')}>
+          <Ionicons color="#16855D" name="add-circle" size={22} />
+          <Text className="ml-2 text-base font-black text-add">Quick Add</Text>
+        </Pressable>
+      </LinearGradient>
+
+      <View className="flex-row gap-3">
+        <SummaryCard
+          icon="calendar"
+          label="Week"
+          tone="gold"
+          value={weeklyReportQuery.data?.total ?? 0}
+        />
+        <SummaryCard
+          icon="receipt"
+          label="Bills"
+          tone="red"
+          value={monthlyReportQuery.data?.expenseCount ?? 0}
+        />
+      </View>
+
+      <View className="rounded-[30px] bg-panel p-5">
+        <SectionTitle subtitle="Tap a chip to change the list" title="Expenses" />
+        <View className="mt-5 flex-row gap-3">
+          {filters.map((item) => (
+            <Pressable
+              key={item}
+              className={`rounded-full px-5 py-3 ${range === item ? 'bg-addSoft' : 'bg-sand'}`}
+              onPress={() => setRange(item)}>
+              <Text className="text-sm font-black capitalize text-ink">{item}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <View className="mt-5 gap-3">
+          {groupedExpenses.length ? (
+            groupedExpenses.map((group) => (
+              <View className="gap-3" key={group.date}>
+                <Text className="text-sm font-black text-mute">{formatLongDateLabel(group.date)}</Text>
+                {group.items.map((expense) => (
+                  <ExpenseItem expense={expense} key={expense.id} />
+                ))}
+              </View>
+            ))
+          ) : (
+            <View className="rounded-[24px] bg-sand p-5">
+              <Text className="text-base font-black text-ink">No spending here yet</Text>
+              <Text className="mt-1 text-sm text-mute">Add the first expense with the green button.</Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </ScreenShell>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+function groupExpenses(expenses: Expense[]) {
+  const groups = new Map<string, Expense[]>();
+
+  for (const expense of expenses) {
+    const key = expense.expenseDate.slice(0, 10);
+    const items = groups.get(key) ?? [];
+    items.push(expense);
+    groups.set(key, items);
+  }
+
+  return Array.from(groups.entries()).map(([date, items]) => ({
+    date,
+    items,
+  }));
+}
