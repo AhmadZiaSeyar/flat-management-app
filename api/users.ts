@@ -15,8 +15,8 @@ export async function createUser(payload: {
   fullName: string;
   username?: string;
   phone?: string;
+  email?: string;
   password: string;
-  pin?: string;
   roleNames?: RoleName[];
 }) {
   const { data } = await api.post<ManagedUser>('/users', payload);

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text, View } from 'react-native';
 import { createUser, getRoles, getUsers, updateUserRoles, updateUserStatus } from '@/api/users';
 import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
 import { ScreenShell } from '@/components/ui/screen-shell';
-import { SectionTitle } from '@/components/ui/section-title';
 import { getErrorMessage } from '@/lib/api-error';
 import { formatLongDateLabel } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
@@ -22,9 +23,10 @@ export default function UsersScreen() {
   const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [pin, setPin] = useState('');
   const [roleNames, setRoleNames] = useState<RoleName[]>(['Member']);
+  const hasLoginIdentifier = Boolean(username.trim() || phone.trim() || email.trim());
 
   const usersQuery = useQuery({
     queryKey: ['users'],
@@ -44,8 +46,8 @@ export default function UsersScreen() {
       setFullName('');
       setUsername('');
       setPhone('');
+      setEmail('');
       setPassword('');
-      setPin('');
       setRoleNames(['Member']);
       showSuccessToast({
         title: 'User added',
@@ -103,8 +105,8 @@ export default function UsersScreen() {
       fullName,
       username: username || undefined,
       phone: phone || undefined,
+      email: email || undefined,
       password,
-      pin: pin || undefined,
       roleNames,
     });
   };
@@ -112,29 +114,78 @@ export default function UsersScreen() {
   if (!canViewUsers) {
     return (
       <ScreenShell>
-        <SectionTitle subtitle="Admin tools only" title="Users" />
-        <View className="rounded-[30px] bg-panel p-6">
-          <Text className="text-2xl font-black text-ink">Only admins can edit people</Text>
-          <Text className="mt-2 text-sm text-mute">
+        <LinearGradient
+          colors={['#72B6FF', '#2563EB', '#132B62']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="overflow-hidden rounded-[38px] p-6 shadow-float">
+          <View className="absolute -left-10 top-2 h-28 w-28 rounded-full bg-white/14" />
+          <View className="absolute right-4 top-10 h-24 w-24 rounded-full bg-white/10" />
+          <Text className="text-xs font-black uppercase tracking-[2px] text-white/74">Admin tools</Text>
+          <Text className="mt-3 text-[34px] font-black leading-10 text-white">Users</Text>
+          <Text className="mt-2 text-sm text-white/74">
             This tab stays simple for members so no one changes roles by mistake.
           </Text>
-          <View className="mt-5 rounded-[24px] bg-sand p-4">
-            <Text className="text-sm font-bold text-mute">You</Text>
-            <Text className="mt-1 text-xl font-black text-ink">{user?.fullName}</Text>
-            <Text className="mt-1 text-sm text-mute">{user?.roles.join(', ')}</Text>
+          <View className="mt-6 rounded-[28px] border border-white/15 bg-white/12 p-5">
+            <Text className="text-xs font-black uppercase tracking-[2px] text-white/72">You</Text>
+            <Text className="mt-2 text-xl font-black text-white">{user?.fullName}</Text>
+            <Text className="mt-1 text-sm text-white/74">{user?.roles.join(', ')}</Text>
           </View>
-        </View>
+        </LinearGradient>
       </ScreenShell>
     );
   }
 
   return (
     <ScreenShell>
-      <SectionTitle subtitle="Manage roommates and roles" title="Users" />
+      <LinearGradient
+        colors={['#72B6FF', '#2563EB', '#132B62']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="overflow-hidden rounded-[38px] p-6 shadow-float">
+        <View className="absolute -left-10 top-2 h-28 w-28 rounded-full bg-white/14" />
+        <View className="absolute right-4 top-10 h-24 w-24 rounded-full bg-white/10" />
+
+        <View className="flex-row items-start justify-between">
+          <View>
+            <Text className="text-xs font-black uppercase tracking-[2px] text-white/74">
+              Shared access
+            </Text>
+            <Text className="mt-3 text-[34px] font-black leading-10 text-white">Users</Text>
+            <Text className="mt-2 text-sm text-white/74">
+              Manage roommates and roles from one clear admin view.
+            </Text>
+          </View>
+          <View className="h-14 w-14 items-center justify-center rounded-[20px] bg-white/14">
+            <Ionicons color="#FFFFFF" name="people" size={24} />
+          </View>
+        </View>
+
+        <View className="mt-6 rounded-[28px] border border-white/15 bg-white/12 p-5">
+          <Text className="text-xs font-black uppercase tracking-[2px] text-white/72">
+            Room size
+          </Text>
+          <Text className="mt-3 text-2xl font-black text-white">{(usersQuery.data ?? []).length}</Text>
+          <Text className="mt-2 text-sm font-semibold text-white/74">
+            {rolesQuery.data?.length
+              ? `${rolesQuery.data.length} role options loaded`
+              : 'Shared people list ready'}
+          </Text>
+        </View>
+      </LinearGradient>
 
       {canCreateUsers ? (
-        <View className="rounded-[30px] bg-panel p-5">
-          <Text className="text-xl font-black text-ink">Add Person</Text>
+        <View className="rounded-[32px] border border-white/80 bg-panel/90 p-5 shadow-card">
+          <Text className="text-[26px] font-black text-ink">Add Person</Text>
+          <Text className="mt-2 text-sm text-mute">
+            Add at least one login name: username, phone, or email.
+          </Text>
+          <View className="mt-4 rounded-[26px] border border-white/70 bg-skySoft/90 p-4">
+            <Text className="text-xs font-black uppercase tracking-[2px] text-sky">Cleaner sign-in</Text>
+            <Text className="mt-2 text-sm text-mute">
+              PIN is removed now, so roommates only need one password.
+            </Text>
+          </View>
           <View className="mt-5 gap-4">
             <AppInput icon="person" label="Full name" onChangeText={setFullName} value={fullName} />
             <AppInput
@@ -152,19 +203,19 @@ export default function UsersScreen() {
               value={phone}
             />
             <AppInput
+              autoCapitalize="none"
+              icon="mail"
+              keyboardType="email-address"
+              label="Email"
+              onChangeText={setEmail}
+              value={email}
+            />
+            <AppInput
               icon="lock-closed"
               label="Password"
               onChangeText={setPassword}
               secureTextEntry
               value={password}
-            />
-            <AppInput
-              icon="keypad"
-              keyboardType="number-pad"
-              label="PIN"
-              onChangeText={setPin}
-              secureTextEntry
-              value={pin}
             />
           </View>
 
@@ -175,7 +226,7 @@ export default function UsersScreen() {
                 <Pressable
                   key={role}
                   className={`rounded-full px-5 py-3 ${
-                    selected ? 'bg-addSoft' : 'bg-sand'
+                    selected ? 'bg-sky shadow-card' : 'bg-sand'
                   }`}
                   onPress={() =>
                     setRoleNames((current) => {
@@ -186,7 +237,9 @@ export default function UsersScreen() {
                       return [...current, role];
                     })
                   }>
-                  <Text className="text-sm font-black text-ink">{role}</Text>
+                  <Text className={`text-sm font-black ${selected ? 'text-white' : 'text-ink'}`}>
+                    {role}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -194,7 +247,7 @@ export default function UsersScreen() {
 
           <View className="mt-5">
             <AppButton
-              disabled={!fullName || !password || createUserMutation.isPending}
+              disabled={!fullName || !password || !hasLoginIdentifier || createUserMutation.isPending}
               label={createUserMutation.isPending ? 'Adding...' : 'Create User'}
               onPress={submit}
             />
@@ -202,27 +255,27 @@ export default function UsersScreen() {
         </View>
       ) : null}
 
-      <View className="rounded-[30px] bg-panel p-5">
-        <Text className="text-xl font-black text-ink">Roommates</Text>
-        <Text className="mt-1 text-sm text-mute">
+      <View className="rounded-[32px] border border-white/80 bg-panel/90 p-5 shadow-card">
+        <Text className="text-[26px] font-black text-ink">Roommates</Text>
+        <Text className="mt-2 text-sm text-mute">
           {rolesQuery.data?.length ? `${rolesQuery.data.length} role options loaded` : 'Shared people list'}
         </Text>
 
         <View className="mt-5 gap-4">
           {(usersQuery.data ?? []).map((member) => (
-            <View className="rounded-[24px] bg-sand p-4" key={member.id}>
+            <View className="rounded-[28px] border border-white/70 bg-sand/90 p-4 shadow-card" key={member.id}>
               <View className="flex-row items-center justify-between">
                 <View>
                   <Text className="text-lg font-black text-ink">{member.fullName}</Text>
                   <Text className="text-sm text-mute">
-                    {member.username || member.phone || 'No login label'}
+                    {member.email || member.username || member.phone || 'No login label'}
                   </Text>
                 </View>
                 <View
                   className={`rounded-full px-3 py-2 ${
-                    member.isActive ? 'bg-addSoft' : 'bg-spendSoft'
+                    member.isActive ? 'bg-skySoft' : 'bg-spendSoft'
                   }`}>
-                  <Text className="text-xs font-black text-ink">
+                  <Text className={`text-xs font-black ${member.isActive ? 'text-sky' : 'text-spend'}`}>
                     {member.isActive ? 'Active' : 'Off'}
                   </Text>
                 </View>
@@ -231,6 +284,23 @@ export default function UsersScreen() {
               <Text className="mt-3 text-xs font-bold uppercase tracking-widest text-mute">
                 {member.roles.join(' • ')}
               </Text>
+              <View className="mt-3 flex-row flex-wrap gap-2">
+                {member.username ? (
+                  <View className="rounded-full bg-panel px-3 py-2">
+                    <Text className="text-xs font-bold text-ink">@{member.username}</Text>
+                  </View>
+                ) : null}
+                {member.email ? (
+                  <View className="rounded-full bg-panel px-3 py-2">
+                    <Text className="text-xs font-bold text-ink">{member.email}</Text>
+                  </View>
+                ) : null}
+                {member.phone ? (
+                  <View className="rounded-full bg-panel px-3 py-2">
+                    <Text className="text-xs font-bold text-ink">{member.phone}</Text>
+                  </View>
+                ) : null}
+              </View>
               <Text className="mt-1 text-xs text-mute">Joined {formatLongDateLabel(member.createdAt)}</Text>
 
               {canAssignRoles ? (
@@ -243,7 +313,7 @@ export default function UsersScreen() {
                         <Pressable
                           key={role}
                           className={`rounded-full px-4 py-3 ${
-                            selected ? 'bg-skySoft' : 'bg-panel'
+                            selected ? 'bg-sky' : 'bg-panel'
                           }`}
                           onPress={() => {
                             const nextRoles = selected
@@ -259,7 +329,9 @@ export default function UsersScreen() {
                               nextRoles,
                             });
                           }}>
-                          <Text className="text-sm font-black text-ink">{role}</Text>
+                          <Text className={`text-sm font-black ${selected ? 'text-white' : 'text-ink'}`}>
+                            {role}
+                          </Text>
                         </Pressable>
                       );
                     })}

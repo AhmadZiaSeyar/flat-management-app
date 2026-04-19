@@ -3,8 +3,7 @@ import { AppUser, AuthResponse } from '@/types/api';
 
 export async function login(payload: {
   identifier: string;
-  password?: string;
-  pin?: string;
+  password: string;
 }) {
   const { data } = await api.post<AuthResponse>('/auth/login', payload);
   return data;

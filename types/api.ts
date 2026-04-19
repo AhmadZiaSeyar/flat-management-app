@@ -4,7 +4,8 @@ export type PermissionName =
   | 'assign_role'
   | 'add_expense'
   | 'view_expense'
-  | 'view_reports';
+  | 'view_reports'
+  | 'view_food_timetable';
 
 export type RoleName = 'Admin' | 'Member';
 
@@ -13,6 +14,7 @@ export interface AppUser {
   fullName: string;
   username: string | null;
   phone: string | null;
+  email: string | null;
   isActive: boolean;
   roles: RoleName[];
   permissions: PermissionName[];
@@ -49,6 +51,7 @@ export interface Expense {
     id: string;
     fullName: string;
     username: string | null;
+    email?: string | null;
   };
 }
 
@@ -74,6 +77,20 @@ export interface BudgetSummary {
   remaining: number;
   percentageUsed: number;
   setBy?: {
+    id: string;
+    fullName: string;
+  } | null;
+  updatedAt?: string | null;
+}
+
+export interface FoodTimetableDay {
+  dayOfWeek: number;
+  breakfast: string | null;
+  lunch: string | null;
+  dinner: string | null;
+  note: string | null;
+  updatedAt: string | null;
+  updatedBy: {
     id: string;
     fullName: string;
   } | null;

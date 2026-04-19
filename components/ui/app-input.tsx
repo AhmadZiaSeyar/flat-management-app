@@ -11,12 +11,17 @@ export function AppInput({
 }) {
   return (
     <View className="gap-2">
-      <Text className="text-sm font-bold text-slate-700">{label}</Text>
-      <View className="flex-row items-center rounded-[22px] border border-line bg-panel px-4 py-4">
-        <Ionicons color="#716759" name={icon} size={20} />
+      <Text className="text-[11px] font-black uppercase tracking-[1px] text-ink/70">{label}</Text>
+      <View className="flex-row items-center rounded-[26px] border border-line/70 bg-white px-4 py-4 shadow-card">
+        <View className="h-11 w-11 items-center justify-center rounded-[18px] bg-skySoft/90">
+          <Ionicons color="#3B82F6" name={icon} size={20} />
+        </View>
         <TextInput
-          className="ml-3 flex-1 text-base font-semibold text-ink"
-          placeholderTextColor="#9A8E7B"
+          className="ml-3 flex-1 text-[16px] font-semibold text-ink"
+          cursorColor="#2563EB"
+          placeholderTextColor="#6B7B93"
+          selectionColor="#2563EB"
+          style={{ color: '#0F1E37', minWidth: 0 }}
           {...props}
         />
       </View>

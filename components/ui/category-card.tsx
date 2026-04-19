@@ -17,17 +17,19 @@ export function CategoryCard({
 
   return (
     <Pressable
-      className={`w-[48%] rounded-[24px] border p-4 ${
-        selected ? 'border-add bg-addSoft' : 'border-line bg-panel'
+      className={`w-[48%] rounded-[28px] border p-4 shadow-card ${
+        selected ? 'border-add bg-skySoft' : 'border-white/80 bg-panel/90'
       }`}
       onPress={onPress}>
       <View
-        className="h-14 w-14 items-center justify-center rounded-[18px]"
-        style={{ backgroundColor: `${category.color}20` }}>
+        className="h-14 w-14 items-center justify-center rounded-[20px]"
+        style={{ backgroundColor: `${category.color}18` }}>
         <Ionicons color={category.color} name={iconName} size={28} />
       </View>
-      <Text className="mt-4 text-lg font-black text-ink">{category.name}</Text>
-      <Text className="mt-1 text-sm text-mute">{selected ? 'Ready' : 'Tap to pick'}</Text>
+      <Text className="mt-5 text-lg font-black text-ink">{category.name}</Text>
+      <Text className="mt-2 text-xs font-black uppercase tracking-[1.1px] text-mute">
+        {selected ? 'Selected' : 'Choose'}
+      </Text>
     </Pressable>
   );
 }

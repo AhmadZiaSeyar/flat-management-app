@@ -1,11 +1,12 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text } from 'react-native';
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
 const containerStyles: Record<Variant, string> = {
-  primary: 'bg-add',
+  primary: 'bg-add shadow-card',
   secondary: 'bg-panel border border-line',
-  danger: 'bg-spend',
+  danger: 'bg-spend shadow-card',
   ghost: 'bg-transparent',
 };
 
@@ -29,12 +30,24 @@ export function AppButton({
 }) {
   return (
     <Pressable
-      className={`items-center justify-center rounded-[20px] px-5 py-4 ${
-        containerStyles[variant]
-      } ${disabled ? 'opacity-50' : ''}`}
+      className={`overflow-hidden rounded-[22px] ${containerStyles[variant]} ${disabled ? 'opacity-50' : ''}`}
       disabled={disabled}
       onPress={onPress}>
-      <Text className={`text-base font-extrabold ${textStyles[variant]}`}>{label}</Text>
+      {variant === 'primary' ? (
+        <LinearGradient
+          colors={['#4C8DFF', '#2563EB', '#1E40AF']}
+          end={{ x: 1, y: 1 }}
+          start={{ x: 0, y: 0 }}
+          style={{ paddingHorizontal: 20, paddingVertical: 18 }}>
+          <Text className={`text-center text-base font-extrabold ${textStyles[variant]}`}>
+            {label}
+          </Text>
+        </LinearGradient>
+      ) : (
+        <Text className={`px-5 py-4 text-center text-base font-extrabold ${textStyles[variant]}`}>
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 }

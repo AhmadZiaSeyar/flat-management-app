@@ -37,16 +37,12 @@ async function deleteStoredItem(key: string) {
   await SecureStore.deleteItemAsync(key);
 }
 
-type LoginMode = 'password' | 'pin';
-
 type AuthState = {
   accessToken: string | null;
   refreshToken: string | null;
   user: AppUser | null;
-  loginMode: LoginMode;
   isHydrated: boolean;
   hydrate: () => Promise<void>;
-  setLoginMode: (mode: LoginMode) => void;
   setSession: (session: AuthResponse) => Promise<void>;
   updateUser: (user: AppUser) => Promise<void>;
   signOut: () => Promise<void>;
@@ -56,7 +52,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   user: null,
-  loginMode: 'password',
   isHydrated: false,
   hydrate: async () => {
     const [accessToken, refreshToken, userJson] = await Promise.all([
@@ -72,7 +67,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isHydrated: true,
     });
   },
-  setLoginMode: (mode) => set({ loginMode: mode }),
   setSession: async (session) => {
     await Promise.all([
       setStoredItem(ACCESS_TOKEN_KEY, session.accessToken),
@@ -102,7 +96,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       accessToken: null,
       refreshToken: null,
       user: null,
-      loginMode: get().loginMode,
       isHydrated: true,
     });
   },

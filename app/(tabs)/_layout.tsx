@@ -20,17 +20,28 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#16855D',
-        tabBarInactiveTintColor: '#8E8373',
+        tabBarActiveTintColor: '#3B82F6',
+        tabBarInactiveTintColor: '#7B89A1',
         tabBarStyle: {
-          backgroundColor: '#FFF9F0',
+          backgroundColor: 'rgba(255,255,255,0.88)',
+          borderTopColor: 'transparent',
           borderTopWidth: 0,
-          height: 86,
+          bottom: 18,
+          height: 80,
+          left: 18,
+          position: 'absolute',
+          right: 18,
+          borderRadius: 30,
+          shadowColor: '#0F1E37',
+          shadowOffset: { width: 0, height: 18 },
+          shadowOpacity: 0.12,
+          shadowRadius: 28,
+          elevation: 14,
           paddingBottom: 12,
-          paddingTop: 10,
+          paddingTop: 12,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 11,
           fontWeight: '800',
         },
       }}>
@@ -47,8 +58,8 @@ export default function TabsLayout() {
           title: 'Add',
           tabBarIcon: ({ focused }) => (
             <View
-              className={`-mt-6 h-16 w-16 items-center justify-center rounded-full ${
-                focused ? 'bg-add' : 'bg-ink'
+              className={`-mt-7 h-[68px] w-[68px] items-center justify-center rounded-full ${
+                focused ? 'bg-add' : 'bg-sky'
               }`}>
               <Ionicons color="#FFFFFF" name="add" size={30} />
             </View>
