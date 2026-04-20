@@ -122,4 +122,6 @@ export interface RoleOption {
 
 export interface ManagedUser extends AppUser {
   createdAt: string;
+  weeklyExpenseTotal: number;
+  monthlyExpenseTotal: number;
 }

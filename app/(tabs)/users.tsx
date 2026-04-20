@@ -7,7 +7,7 @@ import { AppButton } from '@/components/ui/app-button';
 import { AppInput } from '@/components/ui/app-input';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { getErrorMessage } from '@/lib/api-error';
-import { formatLongDateLabel } from '@/lib/format';
+import { formatAmount, formatLongDateLabel } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
 import { showErrorToast, showSuccessToast } from '@/store/toast-store';
 import { RoleName } from '@/types/api';
@@ -284,6 +284,26 @@ export default function UsersScreen() {
               <Text className="mt-3 text-xs font-bold uppercase tracking-widest text-mute">
                 {member.roles.join(' • ')}
               </Text>
+              <View className="mt-4 flex-row gap-3">
+                <View className="flex-1 rounded-[22px] border border-white/70 bg-panel/90 p-4">
+                  <Text className="text-[11px] font-black uppercase tracking-[1.8px] text-mute">
+                    This week
+                  </Text>
+                  <Text className="mt-2 text-xl font-black text-ink">
+                    {formatAmount(member.weeklyExpenseTotal)}
+                  </Text>
+                  <Text className="mt-1 text-xs text-mute">Added by this user</Text>
+                </View>
+                <View className="flex-1 rounded-[22px] border border-white/70 bg-skySoft/75 p-4">
+                  <Text className="text-[11px] font-black uppercase tracking-[1.8px] text-sky/80">
+                    This month
+                  </Text>
+                  <Text className="mt-2 text-xl font-black text-ink">
+                    {formatAmount(member.monthlyExpenseTotal)}
+                  </Text>
+                  <Text className="mt-1 text-xs text-mute">Running monthly total</Text>
+                </View>
+              </View>
               <View className="mt-3 flex-row flex-wrap gap-2">
                 {member.username ? (
                   <View className="rounded-full bg-panel px-3 py-2">
