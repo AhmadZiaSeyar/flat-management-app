@@ -4,8 +4,11 @@ import { useAuthStore } from '@/store/auth-store';
 import { showErrorToast } from '@/store/toast-store';
 import { AuthResponse } from '@/types/api';
 
+const renderApiBaseUrl = 'https://flat-expense-manager-api.onrender.com';
+
 const fallbackBaseUrl = Platform.select({
   android: 'http://10.0.2.2:3000',
+  web: getWebFallbackBaseUrl(),
   default: 'http://localhost:3000',
 });
 
@@ -83,4 +86,15 @@ async function refreshAccessToken() {
     });
     return null;
   }
+}
+
+function getWebFallbackBaseUrl() {
+  if (typeof window === 'undefined') {
+    return renderApiBaseUrl;
+  }
+
+  const isLocalWeb =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+  return isLocalWeb ? 'http://localhost:3000' : renderApiBaseUrl;
 }
