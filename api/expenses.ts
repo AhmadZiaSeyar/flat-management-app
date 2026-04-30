@@ -16,3 +16,8 @@ export async function createExpense(payload: {
   const { data } = await api.post<Expense>('/expenses', payload);
   return data;
 }
+
+export async function clearExpenses() {
+  const { data } = await api.delete<{ deletedCount: number }>('/expenses');
+  return data;
+}

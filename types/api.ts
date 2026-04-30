@@ -4,6 +4,7 @@ export type PermissionName =
   | 'assign_role'
   | 'add_expense'
   | 'view_expense'
+  | 'clear_expenses'
   | 'view_reports'
   | 'view_food_timetable';
 

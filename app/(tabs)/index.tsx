@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getCurrentBudget } from '@/api/budgets';
-import { getExpenses } from '@/api/expenses';
+import { clearExpenses, getExpenses } from '@/api/expenses';
 import { getFoodTimetable } from '@/api/food-timetable';
 import { getMonthlyReport, getWeeklyReport } from '@/api/reports';
 import { ExpenseItem } from '@/components/ui/expense-item';
@@ -12,10 +12,11 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { ScreenShell } from '@/components/ui/screen-shell';
 import { SectionTitle } from '@/components/ui/section-title';
 import { SummaryCard } from '@/components/ui/summary-card';
+import { getErrorMessage } from '@/lib/api-error';
 import { getFoodDayLabel, getTodayFoodDayOfWeek } from '@/lib/food-timetable';
 import { formatAmount, formatLongDateLabel, getFirstName } from '@/lib/format';
 import { useAuthStore } from '@/store/auth-store';
-import { showInfoToast } from '@/store/toast-store';
+import { showErrorToast, showInfoToast, showSuccessToast } from '@/store/toast-store';
 import { Expense } from '@/types/api';
 import { useState } from 'react';
 
@@ -23,10 +24,12 @@ const filters: ('today' | 'week' | 'month')[] = ['today', 'week', 'month'];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const signOut = useAuthStore((state) => state.signOut);
   const [range, setRange] = useState<'today' | 'week' | 'month'>('today');
   const canViewFoodTimetable = user?.permissions.includes('view_food_timetable');
+  const canClearExpenses = user?.permissions.includes('clear_expenses');
 
   const weeklyReportQuery = useQuery({
     queryKey: ['reports', 'weekly'],
@@ -49,6 +52,29 @@ export default function HomeScreen() {
     queryFn: getFoodTimetable,
     enabled: Boolean(canViewFoodTimetable),
   });
+  const clearExpensesMutation = useMutation({
+    mutationFn: clearExpenses,
+    onSuccess: async ({ deletedCount }) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['expenses'] }),
+        queryClient.invalidateQueries({ queryKey: ['reports'] }),
+        queryClient.invalidateQueries({ queryKey: ['budget'] }),
+        queryClient.invalidateQueries({ queryKey: ['users'] }),
+      ]);
+      showSuccessToast({
+        title: 'Expenses cleared',
+        message: deletedCount
+          ? `${deletedCount} expense${deletedCount === 1 ? '' : 's'} removed.`
+          : 'There were no expenses to remove.',
+      });
+    },
+    onError: (error) => {
+      showErrorToast({
+        title: 'Could not clear expenses',
+        message: getErrorMessage(error, 'Please try again in a moment.'),
+      });
+    },
+  });
 
   const groupedExpenses = groupExpenses(expensesQuery.data ?? []);
   const todayFoodPlan = foodTimetableQuery.data?.find(
@@ -67,6 +93,21 @@ export default function HomeScreen() {
       title: 'Signed out',
       message: 'See you again soon.',
     });
+  };
+
+  const confirmClearExpenses = () => {
+    Alert.alert(
+      'Clear all expenses?',
+      'This removes every expense from the shared wallet. Users, categories, budgets, and food timetable stay unchanged.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear all',
+          style: 'destructive',
+          onPress: () => clearExpensesMutation.mutate(),
+        },
+      ],
+    );
   };
 
   return (
@@ -271,6 +312,22 @@ export default function HomeScreen() {
             </Pressable>
           ))}
         </View>
+
+        {canClearExpenses ? (
+          <Pressable
+            className={`mt-4 flex-row items-center justify-center rounded-[24px] border px-5 py-4 ${
+              clearExpensesMutation.isPending
+                ? 'border-red-200 bg-red-50/60'
+                : 'border-red-100 bg-red-50'
+            }`}
+            disabled={clearExpensesMutation.isPending}
+            onPress={confirmClearExpenses}>
+            <Ionicons color="#D64550" name="trash-outline" size={20} />
+            <Text className="ml-2 text-sm font-black text-red-600">
+              {clearExpensesMutation.isPending ? 'Clearing expenses...' : 'Clear all expenses'}
+            </Text>
+          </Pressable>
+        ) : null}
 
         <View className="mt-5 gap-3">
           {groupedExpenses.length ? (
